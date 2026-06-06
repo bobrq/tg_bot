@@ -22,6 +22,16 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True
     )
 
+    await message.answer(
+        f"Привет, {message.from_user.first_name}! 👋\n\nЯ бот-помощник. Выбери что тебя интересует:",
+        reply_markup=keyboard
+    )
+
+    await message.answer(
+        caption=f"Привет, {message.from_user.first_name}! 👋\n\nЯ бот-помощник. Выбери что тебя интересует:",
+        reply_markup=keyboard
+    )
+
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
     await message.answer(
