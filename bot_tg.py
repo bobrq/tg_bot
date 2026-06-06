@@ -1,10 +1,11 @@
-import os
 import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+import os
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = "8702683829:AAHvFi-wl0UNxxXVnxHT6RSVql-wlK4eToc"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -12,18 +13,14 @@ dp = Dispatcher()
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📋 Услуги", callback_data="services")],
-        [InlineKeyboardButton(text="💬 Связаться", callback_data="contact")],
-        [InlineKeyboardButton(text="❓ Помощь", callback_data="help")],
-    ])
-
-    await message.answer(
-        f"Привет, {message.from_user.first_name}! 👋\n\n"
-        "Я бот-помощник. Выбери что тебя интересует:",
-        reply_markup=keyboard
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="🛠 Услуги")],
+            [KeyboardButton(text="💬 Связаться"), KeyboardButton(text="❓ Помощь")],
+            [KeyboardButton(text="🔴 Не нажимать")],
+        ],
+        resize_keyboard=True
     )
-
 
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
@@ -44,31 +41,50 @@ async def cmd_contact(message: types.Message):
         "Отвечаем в течение часа 🕐"
     )
 
-@dp.callback_query()
-async def handle_buttons(callback: types.CallbackQuery):
-    if callback.data == "services":
-        await callback.message.answer(
+
+@dp.message(lambda m: m.text == "🛠 Услуги")
+async def services(message: types.Message):
+    await message.answer_photo(
+        photo="https://i.pinimg.com/originals/0a/be/51/0abe51cb57678c31408dfa25156e94e2.jpg",
+        caption=(
             "🛠 Наши услуги:\n\n"
             "🤖 Telegram-бот для бизнеса — от 3500р\n"
             "🧠 AI-консалтинг — от 10000р\n\n"
             "Напиши чтобы обсудить детали!"
         )
+    )
 
-    elif callback.data == "contact":
-        await callback.message.answer(
-            "📞 Напиши мне напрямую: @bobr_q\n"
-            "Отвечу в течение часа!"
-        )
 
-    elif callback.data == "help":
-        await callback.message.answer(
-            "📌 Доступные команды:\n\n"
-            "/start — главное меню\n"
-            "/help — список команд\n"
-            "/contact — контакты"
-        )
+@dp.message(lambda m: m.text == "💬 Связаться")
+async def contact(message: types.Message):
+    await message.answer(
+        "📞 Напиши мне напрямую: @bobr_q\n"
+        "Отвечу в течение часа!"
+    )
 
-    await callback.answer()
+
+@dp.message(lambda m: m.text == "❓ Помощь")
+async def help_btn(message: types.Message):
+    await message.answer(
+        "📌 Доступные команды:\n\n"
+        "/start — главное меню\n"
+        "/help — список команд\n"
+        "/contact — контакты"
+    )
+@dp.message(lambda m: m.text == "🔴 Не нажимать")
+async def dont_press(message: types.Message):
+    await message.answer("⏳ Сканирую...")
+    await asyncio.sleep(2)
+    await message.answer(
+        f"✅ Сканирование завершено\n\n"
+        f"👤 Пользователь: {message.from_user.full_name}\n"
+        f"🆔 ID: {message.from_user.id}\n"
+        f"📱 Username: @{message.from_user.username}\n"
+        f"🌍 IP: 192.{message.from_user.id % 255}.{len(message.from_user.full_name)}.1\n"
+        f"📍 Локация: Определена\n"
+        f"⚠️ Данные переданы администратору"
+    )
+
 @dp.message()
 async def handle_text(message: types.Message):
     await message.answer(
@@ -80,5 +96,7 @@ async def handle_text(message: types.Message):
 async def main():
     print("Бот запущен...")
     await dp.start_polling(bot)
+
+
 if __name__ == "__main__":
     asyncio.run(main())
